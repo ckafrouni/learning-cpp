@@ -1,10 +1,3 @@
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <regex>
-
 /*
 
 <label declaration> ::=
@@ -55,168 +48,77 @@
     '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7'
     | '8' | '9'
 
-
-
-    
-
-
-
-
 */
 
-enum class TokenType
-{
-    Register,
-    Address,
-    Immediate,
-    LabelDeclaration,
-    LabelReference,
-    Comment,
-    Instruction,
-    Punctuation,
-    Unknown
-};
+#include <string>
+#include <functional>
+#include <iostream>
+#include <tuple>
 
-static constexpr const char *TokenTypeStrings[] = {
-    "Register",
-    "Address",
-    "Immediate",
-    "Label",
-    "Comment",
-    "Instruction",
-    "Punctuation",
-    "Unknown"};
+#include "pc.hpp"
 
-struct Token
-{
-    TokenType type;
-    std::string value;
-    // int line;
-    // int column;
-};
+using namespace pc;
 
-std::ostream &operator<<(std::ostream &os, const TokenType &type)
-{
-    os << TokenTypeStrings[static_cast<int>(type)];
-    return os;
-}
+auto skipSpaces = pc::c::any(pc::p::ch(' '));
+auto manySpaces = pc::c::many(pc::p::ch(' '));
 
-std::ostream &operator<<(std::ostream &os, const Token &token)
-{
-    os << "Token{ ";
-    if (token.type == TokenType::Unknown)
-    {
-        os << "\033[31m"
-           << token.type
-           << "\033[0m, ";
-    }
-    else
-    {
-        os << token.type << ", ";
-    }
-    os << "`"
-       << "\033[32m" << token.value << "\033[0m" << '`' << " }";
+auto reg = pc::c::chain(
+    pc::p::ch('r'),
+    pc::p::dig);
 
-    return os;
-}
-
-TokenType determineTokenType(const std::string &token)
-{
-    if (token[0] == 'r')
-    {
-        return TokenType::Register;
-    }
-    else if (token[0] == '&')
-    {
-        return TokenType::Address;
-    }
-    else if (token[0] == '$')
-    {
-        return TokenType::Immediate;
-    }
-    else if (token.rfind("//", 0) == 0)
-    { // starts with "//"
-        return TokenType::Comment;
-    }
-    else if (std::regex_match(token, std::regex("mov|jmp")))
-    {
-        return TokenType::Instruction;
-    }
-    else if (token.back() == ':')
-    {
-        return TokenType::LabelDeclaration;
-    }
-    else if (token.front() == '!')
-    {
-        return TokenType::LabelReference;
-    }
-    else if (std::regex_match(token, std::regex("[,;]")))
-    {
-        return TokenType::Punctuation;
-    }
-    else
-    {
-        return TokenType::Unknown;
-    }
-}
-
-std::vector<Token> tokenize(const std::string &line)
-{
-    std::vector<Token> tokens;
-
-    std::regex regex(R"(\S+)");
-    auto words_begin = std::sregex_iterator(line.begin(), line.end(), regex);
-    auto words_end = std::sregex_iterator();
-
-    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
-    {
-        std::string tokenValue = (*i).str();
-        TokenType type = determineTokenType(tokenValue);
-
-        // If it's a comment, add it and consume the rest of the line as the comment
-        if (type == TokenType::Comment)
-        {
-            tokens.push_back(Token{type, line.substr(i->position())});
-            break;
-        }
-
-        tokens.push_back(Token{type, tokenValue});
-    }
-
-    return tokens;
-}
-
-std::vector<std::vector<Token>> processInput(const std::string &input)
-{
-    std::istringstream stream(input);
-    std::vector<std::vector<Token>> tokenLines;
-    std::string line;
-
-    while (std::getline(stream, line))
-    {
-        tokenLines.push_back(tokenize(line));
-    }
-
-    return tokenLines;
-}
+auto mov = pc::c::chain(
+    pc::p::str("mov"),
+    manySpaces,
+    reg,
+    skipSpaces,
+    pc::p::ch(','),
+    skipSpaces,
+    reg,
+    // pc::c::comaSeparated(reg),
+    skipSpaces);
 
 int main()
 {
-    std::string input = "main:\n"
-                        "                 mov $0x12, r1              // This is a comment\n"
-                        "                 mov r1, &r2\n"
-                        "                 jmp !main\n";
+    std::string input = "mov r1, r2";
 
-    auto tokenLines = processInput(input);
+    std::cout << "Parsing '" << input << "' with mov" << std::endl;
+    bool result = mov(input);
+    std::cout << "Result: " << result << std::endl;
+    std::cout << "Remaining input: '" << input << "'\n";
 
-    // Output tokens for demonstration
-    for (const auto &line : tokenLines)
-    {
-        for (const auto &token : line)
-        {
-            std::cout << token << std::endl;
-        }
-    }
+    std::cout << std::endl;
 
-    return 0;
+    std::string input2 = "r1,r2,r3";
+    auto sep = pc::c::sepByList(reg, pc::p::ch(','));
+
+    std::cout << "Parsing '" << input2 << "' with sepBy" << std::endl;
+    bool result2 = sep(input2);
+    std::cout << "Result: " << result2 << std::endl;
+
+    std::cout << std::endl;
+
+    std::string input3 = "r1,r2,r3";
+    auto sep2 = pc::c::sepByList(reg, pc::p::ch(','));
+
+    std::cout << "Parsing '" << input3 << "' with sepBy" << std::endl;
+    bool result3 = sep2(input3);
+    std::cout << "Result: " << result3 << std::endl;
+
+    std::cout << std::endl;
+
+    std::string input4 = "r1,r2,";
+    auto sep3 = pc::c::sepBy(2, reg, pc::p::ch(','));
+    std::cout << "Parsing '" << input4 << "' with sepBy" << std::endl;
+    bool result4 = sep3(input4);
+    std::cout << "Result: " << result4 << std::endl;
+
+    std::cout << std::endl;
+
+    std::string input5 = "(r1)";
+    auto parens = pc::c::surroundedBy(pc::p::ch('('), reg, pc::p::ch(')'));
+    std::cout << "Parsing '" << input5 << "' with surroundedBy" << std::endl;
+    bool result5 = parens(input5);
+    std::cout << "Result: " << result5 << std::endl;
+
+    std::cout << std::endl;
 }

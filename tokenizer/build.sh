@@ -12,13 +12,16 @@ mode=$1
 build_dir="build"
 
 if [ "$mode" == "build" ]; then
-    echo -e "\033[0;31mBuild the project...\033[0m"7
+    echo -e "\033[0;31mBuild the project...\033[0m"
 
     mkdir -p $build_dir
     cd $build_dir
     cmake ..
     make -j
-    cd ..
+    if [ $? -ne 0 ]; then
+        echo -e "\033[0;31mBuild failed!\033[0m"
+        exit 1
+    fi
     exit 0
 fi
 
@@ -33,9 +36,17 @@ if [ "$1" == "run" ]; then
     shift 1 # remove the first argument
 
     ./build.sh build
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        exit $ret
+    fi
 
     cd $build_dir
-    ./main $@
+    ./main "$@"
+    if [ $? -ne 0 ]; then
+        echo -e "\033[0;31mRun failed!\033[0m"
+        exit 1
+    fi
     exit 0
 fi
 
