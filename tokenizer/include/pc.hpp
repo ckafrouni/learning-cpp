@@ -4,14 +4,33 @@
 #include <functional>
 #include <iostream>
 #include <tuple>
+#include <regex>
 
 namespace pc
 {
     // Define the type for the parser function
     using Parser = std::function<bool(std::string &)>;
 
+    // Define the result structure that we will use to return the result of the parser function other than a boolean
+    struct ParserResult
+    {
+        bool success;
+        unsigned long start;
+        unsigned long end;
+        std::string value;
+    };
+
+    // Define the type for the new parser function that returns a Result
+    using ParserR = std::function<ParserResult(std::string &)>;
+
     namespace p
     {
+        /**
+         * Parser that matches the character `c`.
+         *
+         * @param c The character to match.
+         * @return A parser that matches the character `c`.
+         */
         auto ch = [](char c) -> Parser
         {
             return [c](std::string &input)
@@ -27,6 +46,12 @@ namespace pc
             };
         };
 
+        /**
+         * Parser that matches the string `s`.
+         *
+         * @param s The string to match.
+         * @return A parser that matches the string `s`.
+         */
         auto str = [](const std::string &s) -> Parser
         {
             return [s](std::string &input)
@@ -42,17 +67,29 @@ namespace pc
             };
         };
 
-        auto is_dig = [](std::string &input)
+        /**
+         * Parser that matches the regular expression `s`.
+         *
+         * @param s The regular expression to match.
+         * @return A parser that matches the regular expression `s`.
+         */
+        auto regex = [](const std::string &s) -> Parser
         {
-            if (!input.empty() && isdigit(input[0]))
+            return [s](std::string &input)
             {
-                std::cout << "digitParser: Consuming '" << input[0] << "'\n";
-                input.erase(0, 1);
-                return true;
-            }
-            std::cout << "digitParser: Not a digit '" << input << "'\n";
-            return false;
+                std::regex r(s);
+                std::smatch m;
+                if (std::regex_search(input, m, r))
+                {
+                    std::cout << "regexParser('" << s << "'): Consuming '" << m[0] << "'\n";
+                    input.erase(0, m[0].length());
+                    return true;
+                }
+                std::cout << "regexParser('" << s << "'): Not matching '" << input << "'\n";
+                return false;
+            };
         };
+
     } // namespace p
 
     namespace c

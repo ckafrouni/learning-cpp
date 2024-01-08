@@ -53,35 +53,24 @@
 
 #include "pc.hpp"
 
-auto digit = pc::c::choice(
-    pc::p::ch('0'),
-    pc::p::ch('1'),
-    pc::p::ch('2'),
-    pc::p::ch('3'),
-    pc::p::ch('4'),
-    pc::p::ch('5'),
-    pc::p::ch('6'),
-    pc::p::ch('7'),
-    pc::p::ch('8'),
-    pc::p::ch('9'));
+auto skipSpaces = pc::p::regex("^[ \t]*");
+auto manySpaces = pc::p::regex("^[ \t]+");
 
-auto hexDigit = pc::c::choice(
-    digit,
-    pc::p::ch('a'),
-    pc::p::ch('b'),
-    pc::p::ch('c'),
-    pc::p::ch('d'),
-    pc::p::ch('e'),
-    pc::p::ch('f'));
+auto digit = pc::p::regex("^[0-9]");
+auto hexDigit = pc::p::regex("^[0-9a-fA-F]");
+auto reg = pc::p::regex("^[rR][1-4]");
+auto identifier = pc::p::regex("^[a-zA-Z][a-zA-Z0-9_]*");
 
-auto skipSpaces = pc::c::any(pc::p::ch(' '));
-auto manySpaces = pc::c::many(pc::p::ch(' '));
+auto label_declaration = pc::c::chain(
+    identifier,
+    skipSpaces,
+    pc::p::ch(':'));
 
-auto reg = pc::c::chain(
-    pc::p::ch('r'),
-    pc::p::dig);
+auto label_reference = pc::c::chain(
+    pc::p::ch('!'),
+    identifier);
 
-auto mov = pc::c::chain(
+auto mov_reg_reg = pc::c::chain(
     pc::p::str("mov"),
     manySpaces,
     reg,
@@ -89,5 +78,4 @@ auto mov = pc::c::chain(
     pc::p::ch(','),
     skipSpaces,
     reg,
-    // pc::c::comaSeparated(reg),
     skipSpaces);
