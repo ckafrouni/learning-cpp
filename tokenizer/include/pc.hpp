@@ -42,7 +42,7 @@ namespace pc
             };
         };
 
-        auto dig = [](std::string &input)
+        auto is_dig = [](std::string &input)
         {
             if (!input.empty() && isdigit(input[0]))
             {
@@ -64,7 +64,7 @@ namespace pc
          * @return A parser that applies the parsers `parsers` in order.
          */
         template <typename... Parsers>
-        auto choice = [](Parsers... parsers) -> Parser
+        auto choice(Parsers... parsers) -> Parser
         {
             return [parsers = std::make_tuple(parsers...)](std::string &input) mutable
             {
