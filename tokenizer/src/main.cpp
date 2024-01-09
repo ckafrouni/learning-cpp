@@ -15,7 +15,8 @@ int test_characters()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `ch(\"a\")`\033[0m" << std::endl;
-        if (c(i).success)
+        auto result = c(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -26,7 +27,8 @@ int test_characters()
 
     // Should fail
     test_run_count++;
-    if (c("b").success)
+    auto result = c("b");
+    if (result.success)
     {
         std::cout << "\033[1;31mFailure!\033[0m" << std::endl;
     }
@@ -48,7 +50,8 @@ int test_identifier()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `identifier`\033[0m" << std::endl;
-        if (identifier(i).success)
+        auto result = identifier(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -61,7 +64,8 @@ int test_identifier()
     std::cout << "\033[1;33mParsing '1identifier' using `identifier`\033[0m" << std::endl;
     test_run_count++;
     auto i("1identifier");
-    if (identifier(i).success)
+    auto result = identifier(i);
+    if (result.success)
         std::cout
             << "\033[1;31mFailure!\033[0m" << std::endl;
     else
@@ -82,7 +86,8 @@ int test_register()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `reg`\033[0m" << std::endl;
-        if (reg(i).success)
+        auto result = reg(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -103,7 +108,8 @@ int test_hexdigit()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `hexDigit`\033[0m" << std::endl;
-        if (hexDigit(i).success)
+        auto result = hexDigit(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -124,7 +130,8 @@ int test_digit()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `digit`\033[0m" << std::endl;
-        if (digit(i).success)
+        auto result = digit(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -150,7 +157,12 @@ int test_label_decl()
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
-            std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: '" << result.parsed << "'\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
+            std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: [ ";
+            for (const auto &parsed : result.parsed)
+            {
+                std::cout << "'" << parsed << "', ";
+            }
+            std::cout << "]\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
         }
         else
             std::cout << "\033[1;31mFailure!\033[0m" << std::endl;
@@ -167,7 +179,12 @@ int test_label_decl()
     {
         test_success_count++;
         std::cout << "\033[1;32mCorrectly Failed!\033[0m" << std::endl;
-        std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: '" << result.parsed << "'\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
+        std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: [ ";
+        for (const auto &parsed : result.parsed)
+        {
+            std::cout << "'" << parsed << "', ";
+        }
+        std::cout << "]\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
     }
 
     return test_success_count == test_run_count;
@@ -182,7 +199,8 @@ int test_label_ref()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `label`\033[0m" << std::endl;
-        if (label_reference(i).success)
+        auto result = label_reference(i);
+        if (result.success)
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
@@ -208,7 +226,12 @@ int test_mov_reg_reg()
         {
             test_success_count++;
             std::cout << "\033[1;32mSuccess!\033[0m" << std::endl;
-            std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: '" << result.parsed << "'\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
+            std::cout << "\033[1;34m-> Start: " << result.start << "\n-> End: " << result.end << "\n-> Parsed: [ ";
+            for (const auto &parsed : result.parsed)
+            {
+                std::cout << "'" << parsed << "', ";
+            }
+            std::cout << "]\n-> Remaining: '" << result.remaining << "'\033[0m" << std::endl;
         }
         else
             std::cout << "\033[1;31mFailure!\033[0m" << std::endl;
