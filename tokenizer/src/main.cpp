@@ -1,7 +1,9 @@
 #include <string>
 #include <iostream>
 
-#include "pc.hpp"
+#include "pc/pc.hpp"
+#include "pc/utils.hpp"
+
 #include "parsers/mov.hpp"
 
 int test_characters()
@@ -108,7 +110,7 @@ int test_hexdigit()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `hexDigit`\033[0m" << std::endl;
-        auto result = hexDigit(i);
+        auto result = pc::utils::hexDigit(i);
         if (result.success)
         {
             test_success_count++;
@@ -130,7 +132,7 @@ int test_digit()
     {
         test_run_count++;
         std::cout << "\033[1;33mParsing '" << i << "' using `digit`\033[0m" << std::endl;
-        auto result = digit(i);
+        auto result = pc::utils::digit(i);
         if (result.success)
         {
             test_success_count++;
