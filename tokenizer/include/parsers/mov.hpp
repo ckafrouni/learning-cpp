@@ -53,8 +53,18 @@
 
 #include "pc.hpp"
 
-auto skipSpaces = pc::p::regex("^[ \t]*");
+// auto skipSpaces = pc::p::regex("^[ \t]*");
 auto manySpaces = pc::p::regex("^[ \t]+");
+
+auto skipSpaces = [](auto input) -> pc::ParserResult
+{
+    auto result = pc::p::regex("^[ \t]*")(input);
+    if (result.success)
+    {
+        result.parsed = "";
+    }
+    return result;
+};
 
 auto digit = pc::p::regex("^[0-9]");
 auto hexDigit = pc::p::regex("^[0-9a-fA-F]");
@@ -64,10 +74,10 @@ auto identifier = pc::p::regex("^[a-zA-Z][a-zA-Z0-9_]*");
 auto label_declaration = pc::c::chain(
     identifier,
     skipSpaces,
-    pc::p::ch(':'));
+    pc::p::ch(":"));
 
 auto label_reference = pc::c::chain(
-    pc::p::ch('!'),
+    pc::p::ch("!"),
     identifier);
 
 auto mov_reg_reg = pc::c::chain(
@@ -75,7 +85,7 @@ auto mov_reg_reg = pc::c::chain(
     manySpaces,
     reg,
     skipSpaces,
-    pc::p::ch(','),
+    pc::p::ch(","),
     skipSpaces,
     reg,
     skipSpaces);
