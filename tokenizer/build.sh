@@ -50,4 +50,22 @@ if [ "$1" == "run" ]; then
     exit 0
 fi
 
+if [ "$1" == "test" ]; then
+    echo -e "\033[0;31mRun the tests...\033[0m"
+    shift 1 # remove the first argument
+    cd $build_dir
+    cmake -DENABLE_TESTING=ON ..
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        exit $ret
+    fi
+
+    ctest "$@"
+    if [ $? -ne 0 ]; then
+        echo -e "\033[0;31mRun failed!\033[0m"
+        exit 1
+    fi
+    exit 0
+fi
+
 echo -e "\033[0;31mInvalid mode: $mode\033[0m"

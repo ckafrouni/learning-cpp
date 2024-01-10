@@ -15,14 +15,26 @@ namespace pc
 {
     namespace utils
     {
-        auto spaces = pc::p::regex("^[ \t]+");
+        auto spaces = pc::p::regex("^[ \t]+", "spaces");
         auto optional_spaces = pc::c::optional(spaces);
 
         auto skip_spaces = pc::c::skip(spaces);
-        auto skip_optional_spaces = pc::c::skip(optional_spaces);
+        auto skip_spaces_opt = pc::c::skip(optional_spaces);
 
-        auto digit = pc::p::regex("^[0-9]");
-        auto hexDigit = pc::p::regex("^[0-9a-fA-F]");
+        auto digit = pc::p::regex("^[0-9]", "digit");
+        auto hex_digit = pc::p::regex("^[0-9a-fA-F]", "hex digit");
+        auto num = pc::p::regex("^[0-9]+", "number");
+        auto hex_number = pc::p::regex("^[0-9a-fA-F]+", "hex number");
 
+        auto pair = [](auto a, auto sep, auto b)
+        {
+            return pc::c::chain(
+                a,
+                pc::utils::skip_spaces_opt,
+                pc::c::skip(sep),
+                pc::utils::skip_spaces_opt,
+                b,
+                pc::utils::skip_spaces_opt);
+        };
     } // namespace utils
 } // namespace pc

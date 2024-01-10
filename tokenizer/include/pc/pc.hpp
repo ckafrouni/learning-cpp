@@ -27,11 +27,33 @@ namespace pc
         std::string remaining;
     };
 
-    /**
-     * Type for the parser function that returns a `ParserResult`.
-     *
-     * @param str The string to parse.
-     * @return The result of the parser.
-     */
-    using ParserR = std::function<ParserResult(const char *)>;
+    class Parser
+    {
+    public:
+        std::function<ParserResult(const char *)> parseFunction;
+        std::string name;
+
+        Parser(std::function<ParserResult(const char *)> func, const std::string &n = "")
+            : parseFunction(std::move(func)), name(n) {}
+
+        ParserResult parse(const char *input) const
+        {
+            return parseFunction(input);
+        }
+
+        // Callable operator for convenience
+        ParserResult operator()(const char *input) const
+        {
+            return parse(input);
+        }
+    };
+
+    // /**
+    //  * Type for the parser function that returns a `ParserResult`.
+    //  *
+    //  * @param str The string to parse.
+    //  * @return The result of the parser.
+    //  */
+    // using Parser = std::function<ParserResult(const char *)>;
+
 } // namespace pc
