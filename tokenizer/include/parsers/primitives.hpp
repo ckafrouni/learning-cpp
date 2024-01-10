@@ -75,33 +75,35 @@
 
 */
 
-auto hex_num = pc::c::chain(
-    pc::p::str("0x"),
-    pc::utils::hex_number,
-    pc::utils::skip_spaces_opt);
+namespace primitives
+{
+    auto hex_num = pc::c::chain(
+        pc::p::str("0x"),
+        pc::utils::hex_number,
+        pc::utils::skip_spaces_opt);
 
-auto op = pc::c::choice(
-    pc::p::ch("+"),
-    pc::p::ch("-"),
-    pc::p::ch("*"),
-    pc::p::ch("/"),
-    pc::p::ch("%"));
-auto reg = pc::p::regex("^[rR][1-4]", "register");
-auto identifier = pc::p::regex("^[a-zA-Z][a-zA-Z0-9_]*", "identifier");
+    auto op = pc::c::choice(
+        pc::p::ch("+"),
+        pc::p::ch("-"),
+        pc::p::ch("*"),
+        pc::p::ch("/"),
+        pc::p::ch("%"));
+    auto reg = pc::p::regex("^[rR][1-4]", "register");
+    auto identifier = pc::p::regex("^[a-zA-Z][a-zA-Z0-9_]*", "identifier");
 
-auto label_def = pc::c::chain(
-    identifier,
-    pc::utils::skip_spaces_opt,
-    pc::p::ch(":"),
-    pc::utils::skip_spaces_opt);
+    auto label_def = pc::c::chain(
+        identifier,
+        pc::utils::skip_spaces_opt,
+        pc::p::ch(":"),
+        pc::utils::skip_spaces_opt);
 
-auto label_ref = pc::c::chain(
-    pc::p::ch("!"),
-    identifier,
-    pc::utils::skip_spaces_opt);
+    auto label_ref = pc::c::chain(
+        pc::p::ch("!"),
+        identifier,
+        pc::utils::skip_spaces_opt);
 
-pc::Parser expr([](const char *input)
-                {
+    pc::Parser expr([](const char *input)
+                    {
     auto sq_bracketed_expr = pc::c::surround(
         pc::c::skip(pc::p::ch("[")),
         expr,
@@ -119,32 +121,33 @@ pc::Parser expr([](const char *input)
             pc::c::skip(pc::p::ch("(")),
             pc::utils::pair(expr, op, expr),
             pc::c::skip(pc::p::ch(")"))))(input); },
-                "expr");
+                    "expr");
 
-auto sq_bracketed_expr = pc::c::surround(
-    pc::c::skip(pc::p::ch("[")),
-    expr,
-    pc::c::skip(pc::p::ch("]")));
+    auto sq_bracketed_expr = pc::c::surround(
+        pc::c::skip(pc::p::ch("[")),
+        expr,
+        pc::c::skip(pc::p::ch("]")));
 
-auto lit = pc::c::chain(
-    pc::p::ch("$"),
-    pc::c::choice(
-        hex_num,
-        sq_bracketed_expr),
-    pc::utils::skip_spaces_opt);
+    auto lit = pc::c::chain(
+        pc::p::ch("$"),
+        pc::c::choice(
+            hex_num,
+            sq_bracketed_expr),
+        pc::utils::skip_spaces_opt);
 
-auto addr = pc::c::chain(
-    pc::p::ch("&"),
-    pc::c::choice(
+    auto addr = pc::c::chain(
+        pc::p::ch("&"),
+        pc::c::choice(
+            reg,
+            sq_bracketed_expr),
+        pc::utils::skip_spaces_opt);
+
+    auto src = pc::c::choice(
         reg,
-        sq_bracketed_expr),
-    pc::utils::skip_spaces_opt);
+        addr,
+        lit);
 
-auto src = pc::c::choice(
-    reg,
-    addr,
-    lit);
-
-auto dst = pc::c::choice(
-    reg,
-    addr);
+    auto dst = pc::c::choice(
+        reg,
+        addr);
+} // namespace primitives
